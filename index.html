@@ -1,69 +1,81 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AJAX Comments CRUD</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        /* Loading Spinner Center karnyasathi CSS */
-        #spinner {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            background-color: rgba(255, 255, 255, 0.7);
-            z-index: 9999;
-        }
-    </style>
-</head>
-<body class="bg-light">
+<html>
+	<head>
+		<title>Comments</title>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+		<link rel ="stylesheet" href ="./assets/css/style.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	</head>
+	<body>
+		<div class="container-fluid mt-5">
+			<div class="row">
+				<div class="col-md-6 offset-md-3">
+					<div class="card">
+						<div class="card-body">
+							<form action="" id="inputform">
+								<div class="form-group">
+									<label for="name" class="font-weight-bold">Name*</label>
+									<input type="text" class="form-control" id="name">
+								</div>
+								<div class="form-group">
+									<label for="email" class="font-weight-bold">Email*</label>
+									<input type="text" class="form-control" id="email">
+								</div>
+								<div class="form-group">
+									<label for="body" class="font-weight-bold">Comment*</label>
+									<textarea class="form-control" rows="4" id="body"></textarea>
+								</div>
+								<div class="form-group">
+									<label for="userId" class="font-weight-bold">UserId*</label>
+									<select class="form-control" id="userId">
+										<option value="1">1</option>
+										<option value="2">2</option>
+										<option value="3">3</option>
+										<option value="4">4</option>
+										<option value="5">5</option>
+										<option value="6">6</option>
+										<option value="7">7</option>
+										<option value="8">8</option>
+										<option value="9">9</option>
 
-    
+									</select>
+								</div>
+								<button class="btn btn-sm btn-block btn-primary" id="Addcomment">Add Comment</button>
+								<button type="button" class="d-none btn btn-sm btn-block btn-success" id="Updatecomment">Update Comment</button>
 
-    <div class="container mt-5">
-        <div class="row mb-5 justify-content-center">
-            <div class="col-md-6">
-                <div class="card shadow">
-                    <div class="card-body">
-                        <h2 class="text-center mb-4">Manage Comments</h2>
-                        <form id="commentForm">
-                            <div class="mb-3">
-                                <label for="commentName" class="form-label fw-bold">Comment Name*</label>
-                                <input type="text" class="form-control" id="commentName" required placeholder="Enter comment heading">
-                            </div>
-                            <div class="mb-3">
-                                <label for="commentEmail" class="form-label fw-bold">User Email*</label>
-                                <input type="email" class="form-control" id="commentEmail" required placeholder="Enter email">
-                            </div>
-                            <div class="mb-3">
-                                <label for="commentBody" class="form-label fw-bold">Comment Body*</label>
-                                <textarea class="form-control" id="commentBody" rows="4" required placeholder="Write your comment here..."></textarea>
-                            </div>
-                            <div class="d-grid gap-2">
-                                <button type="submit" id="addCommentBtn" class="btn btn-primary">Add Comment</button>
-                                <button type="button" id="updateCommentBtn" class="btn btn-info text-white d-none">Update Comment</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mt-5" id="cardcontainer">
+				<!-- <div class="col-md-4 my-4">
+					<div class="card">
+						<div class="card-header">
+							<h2>Name</h2>
+							
+						</div>
+						<div class="card-body">
+							<h3>email</h3>
+							<p>body</p>
+						</div>
+						<div class="card-footer d-flex justify-content-between">
+							<button class="btn btn-danger btn-sm " onclick="OnEdit(this)">Edit</button>
+							<button class="btn btn-primary btn-sm " onclick="OnRemove(this)">Delete</button>
 
-        <h3 class="mb-4">All Comments</h3>
-        <hr>
-        <div class="row" id="commentContainer">
-            </div>
-    </div>
+						</div>
+					</div>
+				</div> -->
+			</div>
+		</div>
+		<div class="spinner d-none" id="spinner">
+			<div class="spinner-border text-warning" role="status">
+  				<span class="sr-only">Loading...</span>
+			</div>
+		</div>
 
-    <div id="spinner" class="d-flex justify-content-center align-items-center d-none">
-        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="./assets/js/app.js"></script>
-</body>
-</html>
+		
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+		<script src="./assets/js/app.js"></script>
+	</body>
+</html>   

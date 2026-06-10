@@ -1,268 +1,312 @@
 const cl = console.log;
+const inputform =document.getElementById('inputform')
+const Addcomment =document.getElementById('Addcomment')
+const Updatecomment =document.getElementById('Updatecomment')
+const spinner =document.getElementById('spinner')
+const name =document.getElementById('name')
+const email =document.getElementById('email')
+const body =document.getElementById('body')
+const userId =document.getElementById('userId')
 
-// API configuration 
-const BASE_URL = 'https://jsonplaceholder.typicode.com';
-const COMMENT_URL = `${BASE_URL}/comments`; 
 
-// DOM Elements Selection
-const spinner = document.getElementById('spinner');
-const commentForm = document.getElementById('commentForm');
-const nameControl = document.getElementById('commentName');
-const emailControl = document.getElementById('commentEmail');
-const bodyControl = document.getElementById('commentBody');
-const addCommentBtn = document.getElementById('addCommentBtn');
-const updateCommentBtn = document.getElementById('updateCommentBtn');
-const commentContainer = document.getElementById('commentContainer');
 
-let commentsArr = [];
-let updateCommentId = null;
+let Base_Url = `https://jsonplaceholder.typicode.com`
 
-// Snackbar / SweetAlert Popup Alert Function
-function snackbar(msg, icon) {
-    Swal.fire({
-        title: msg,
-        icon: icon,
-        timer: 3000,
-        showConfirmButton: false
-    });
+let CommentArr =[]
+
+
+
+function snackbar(msg,icon){
+  swal.fire({
+    title : msg,
+    icon : icon,
+    timer : 3000
+  })
 }
 
-// 1. READ
+function fetchcomment(){
 
-function fetchComments() {
-    spinner.classList.remove('d-none');
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', COMMENT_URL);
-    xhr.send(null);
+  spinner.classList.remove('d-none')
 
-    xhr.onload = function () {
-        if (xhr.status >= 200 && xhr.status <= 299) {
-            let data = JSON.parse(xhr.response);
-            commentsArr = [...data];
-            // Khup motha data (500 comments) aslyamule pahile 20 items list madhye reverse karun UI la dakhvto.
-            createCommentCards(data.slice(0, 20).reverse()); 
-            spinner.classList.add('d-none');
-        } else {
-            spinner.classList.add('d-none');
-            snackbar('Something went wrong while fetching data!', 'error');
-        }
-    };
+  let Post_url = `${Base_Url}/comments`
+
+  let xhr = new XMLHttpRequest()
+  xhr.open('GET',Post_url)
+
+  xhr.send(null)
+
+  xhr.onload = function() {
+    if(xhr.status >=200 && xhr.status <=299){
+      CommentArr = JSON.parse(xhr.response)
+
+      createCards(CommentArr.reverse())
+    }
+  }
+
+
 }
 
-fetchComments();
+fetchcomment()
 
-// Function to generate Dynamic Cards HTML
-function createCommentCards(arr) {
-    let result = '';
-    arr.forEach(comment => {
-        result += `
-            <div class="col-md-4 mb-4" id="${comment.id}">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-header bg-dark text-white">
-                        <h5 class="card-title text-truncate mb-1">${comment.name}</h5>
-                        <small class="text-info">${comment.email}</small>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">${comment.body}</p>
-                    </div>
-                    <div class="card-footer d-flex justify-content-between bg-white">
-                        <button onclick="onEditComment(this)" class="btn btn-sm btn-outline-info">Edit</button>
-                        <button onclick="onRemoveComment(this)" class="btn btn-sm btn-outline-danger">Remove</button>
-                    </div>
+
+function createCards(arr){
+  let result =``
+
+  arr.forEach(ele =>{
+    result+=`<div class="col-md-3 col-sm-6 mb-4" id='${ele.id}'>
+                <div class="card h-100">
+                  <div class="card-header">
+                    <h2>${ele.email}</h2>
+                    
+                  </div>
+                  <div class="card-body">
+                    <h3> Name : ${ele.name}</h3>
+                    <p> Comment : ${ele.body}</p>
+                  </div>
+                  <div class="card-footer d-flex justify-content-between">
+                    <button class="btn btn-danger btn-sm " onclick="OnEdit(this)">Edit</button>
+                    <button class="btn btn-primary btn-sm " onclick="OnRemove(this)">Delete</button>
+
+                  </div>
                 </div>
-            </div>
-        `;
-    });
-    commentContainer.innerHTML = result;
+              </div>`
+  })
+
+  let cardcontainer = document.getElementById('cardcontainer')
+
+  cardcontainer.innerHTML =result
+
+  spinner.classList.add('d-none')
+
 }
 
 
-// 2. CREATE 
+function onsubmit(ele){
+  ele.preventDefault()
+  spinner.classList.remove('d-none')
 
-function onCommentSubmit(eve) {
-    eve.preventDefault();
-    
-    let COMMENT_OBJ = {
-        name: nameControl.value,
-        email: emailControl.value,
-        body: bodyControl.value
-    };
+  
+  let newobj ={
+    userId : userId.value,
+    name : name.value,
+    email : email.value,
+    body : body.value
 
-    spinner.classList.remove('d-none');
-    let xhr = new XMLHttpRequest();
-    xhr.open('POST', COMMENT_URL);
-    xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-    xhr.send(JSON.stringify(COMMENT_OBJ));
+  }
 
-    xhr.onload = function () {
-        if (xhr.status >= 200 && xhr.status <= 299) {
-            let res = JSON.parse(xhr.response);
-            
-            
-            res.name = COMMENT_OBJ.name;
-            res.email = COMMENT_OBJ.email;
-            res.body = COMMENT_OBJ.body;
+  let Post_url = `${Base_Url}/comments`
 
-            
-            let col = document.createElement('div');
-            col.className = 'col-md-4 mb-4';
-            col.id = res.id;
-            col.innerHTML = `
-                <div class="card h-100 shadow-sm">
-                    <div class="card-header bg-dark text-white">
-                        <h5 class="card-title text-truncate mb-1">${res.name}</h5>
-                        <small class="text-info">${res.email}</small>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">${res.body}</p>
-                    </div>
-                    <div class="card-footer d-flex justify-content-between bg-white">
-                        <button onclick="onEditComment(this)" class="btn btn-sm btn-outline-info">Edit</button>
-                        <button onclick="onRemoveComment(this)" class="btn btn-sm btn-outline-danger">Remove</button>
-                    </div>
-                </div>
-            `;
-            commentContainer.prepend(col);
-            commentForm.reset();
-            spinner.classList.add('d-none');
-            snackbar(`New comment with id ${res.id} created successfully!`, 'success');
-        } else {
-            spinner.classList.add('d-none');
-            snackbar('Failed to add comment!', 'error');
-        }
-    };
-}
-if(commentForm) {
-    commentForm.addEventListener('submit', onCommentSubmit);
-}
+  let xhr = new XMLHttpRequest()
 
+  xhr.open('POST',Post_url)
 
-// 3. UPDATE 
+  xhr.send(JSON.stringify(newobj))
 
-function onEditComment(ele) {
-    updateCommentId = ele.closest('.col-md-4').id;
-    let EDIT_URL = `${COMMENT_URL}/${updateCommentId}`;
+  xhr.onload = function(){
 
-    spinner.classList.remove('d-none');
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', EDIT_URL);
-    xhr.send(null);
+    if(xhr.status >=200 && xhr.status <= 299){
+      let res = JSON.parse(xhr.response)
 
-    xhr.onload = function () {
-        if (xhr.status >= 200 && xhr.status <= 299) {
-            let res = JSON.parse(xhr.response);
-            nameControl.value = res.name;
-            emailControl.value = res.email;
-            bodyControl.value = res.body;
+      createNewcard(newobj,res)
 
-            addCommentBtn.classList.add('d-none');
-            updateCommentBtn.classList.remove('d-none');
-            spinner.classList.add('d-none');
-            
-            // Window var scroll up karne jevha user edit click karel
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        }
-    };
-}
-
-
-// 3. UPDATE 
-
-function onUpdateCommentSubmit() {
-    let UPDATE_OBJ = {
-        name: nameControl.value,
-        email: emailControl.value,
-        body: bodyControl.value
-    };
-
-    spinner.classList.remove('d-none');
-    let UPDATE_URL = `${COMMENT_URL}/${updateCommentId}`;
-
-    let xhr = new XMLHttpRequest();
-    xhr.open('PATCH', UPDATE_URL);
-    xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-    xhr.send(JSON.stringify(UPDATE_OBJ));
-
-    xhr.onload = function () {
-        if (xhr.status >= 200 && xhr.status <= 299) {
-            
-            let card = document.getElementById(updateCommentId);
-            if(card) {
-                card.querySelector('.card-title').innerHTML = UPDATE_OBJ.name;
-                card.querySelector('.text-info').innerHTML = UPDATE_OBJ.email;
-                card.querySelector('.card-text').innerHTML = UPDATE_OBJ.body;
-            }
-            
-            commentForm.reset();
-            addCommentBtn.classList.remove('d-none');
-            updateCommentBtn.classList.add('d-none');
-            spinner.classList.add('d-none');
-            snackbar('Comment updated successfully!', 'success');
-        } else {
-            spinner.classList.add('d-none');
-            snackbar('Failed to update comment!', 'error');
-        }
-    };
-}
-if(updateCommentBtn) {
-    updateCommentBtn.addEventListener('click', onUpdateCommentSubmit);
-}
-
-
-// 4. DELETE (Remove with SweetAlert2 Confirmation Popup)
-
-function onRemoveComment(ele) {
-    
-    let removeId = ele.closest('.col-md-4').id;
-    let DELETE_URL = `${COMMENT_URL}/${removeId}`;
+    }else{
+      snackbar(xhr,'error')
+    }
 
     
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this comment!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',    
-        confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-        
-        if (result.isConfirmed) {
-            
-        
-            spinner.classList.remove('d-none');
-            
-            let xhr = new XMLHttpRequest();
-            xhr.open('DELETE', DELETE_URL);
-            xhr.send(null);
 
-            xhr.onload = function () {
-                if (xhr.status >= 200 && xhr.status <= 299) {
-                    
-                    let cardHTML = document.getElementById(removeId);
-                    if(cardHTML) {
-                        cardHTML.remove();
-                    }
-                    
-                    
-                    spinner.classList.add('d-none');
-                    
-                    
-                    Swal.fire(
-                        'Deleted!',
-                        'Your comment has been deleted successfully.',
-                        'success'
-                    );
-                } else {
-                    spinner.classList.add('d-none');
-                    Swal.fire('Error!', 'Failed to delete comment from server.', 'error');
-                }
-            };
-            
-            xhr.onerror = function() {
-                spinner.classList.add('d-none');
-                Swal.fire('Error!', 'Network issue while deleting.', 'error');
-            };
-        }
-    });
+  }
+
 }
+
+function createNewcard(newobj,res){
+  let div = document.createElement('div')
+  div.className = 'col-md-4 my-4'
+  div.id = res.id
+
+
+  div.innerHTML =`<div class="card h-100">
+                  <div class="card-header">
+                    <h2>${newobj.email}</h2>
+                    
+                  </div>
+                  <div class="card-body">
+                    <h3> Name : ${newobj.name}</h3>
+                    <p> Comment : ${newobj.body}</p>
+                  </div>
+                  <div class="card-footer d-flex justify-content-between">
+                    <button class="btn btn-danger btn-sm " onclick="OnEdit(this)">Edit</button>
+                    <button class="btn btn-primary btn-sm " onclick="OnRemove(this)">Delete</button>
+
+                  </div>
+                </div>`
+
+  let cardcontainer = document.getElementById('cardcontainer')
+
+  cardcontainer.prepend(div)
+  inputform.reset()
+
+  snackbar(`The New Comment id ${res.id} Is Added Successfully!!`,'success')
+
+  spinner.classList.add('d-none')
+
+
+}
+
+
+function OnEdit(ele){
+  let EditId = ele.closest('.col-md-4').id
+  spinner.classList.remove('d-none')
+
+  localStorage.setItem('EditId',EditId)
+
+
+  let Get_url = `${Base_Url}/comments/${EditId}`
+
+  let xhr = new XMLHttpRequest()
+
+  xhr.open('GET',Get_url)
+
+  xhr.send(null)
+
+  xhr.onload = function (){
+    if(xhr.status >=200 && xhr.status <=299){
+      let editObj = JSON.parse(xhr.response)
+
+      name.value = editObj.name
+      email.value = editObj.email
+      body.value = editObj.body
+      name.value = editObj.name
+
+      Addcomment.classList.add('d-none')
+      Updatecomment.classList.remove('d-none')
+
+
+
+    }else{
+      snackbar(xhr,'error')
+    }
+
+     spinner.classList.add('d-none')
+
+
+  }
+
+
+}
+
+function onupdate(){
+  spinner.classList.remove('d-none')
+
+
+  let updateId = localStorage.getItem('EditId')
+
+  let updateObj ={
+    userId : userId.value,
+    name : name.value,
+    email : email.value,
+    body : body.value,
+    id : updateId
+  }
+
+
+  let PUT_Url = `${Base_Url}/comments/${updateId}`
+
+  let xhr = new XMLHttpRequest()
+
+  xhr.open('PUT',PUT_Url)
+
+  xhr.send(updateObj)
+
+  xhr.onload = function(){
+    if(xhr.status >= 200 && xhr.status <= 299){
+
+      let div = document.getElementById(updateId)
+      let h2 = div.querySelector('.card-header h2')
+
+      h2.innerText = updateObj.name
+
+      let h3 = div.querySelector('.card-body h3')
+
+      h3.innerText = updateObj.email
+
+      let p = div.querySelector('.card-body p')
+
+      p.innerText = updateObj.body
+
+      inputform.reset()
+      Addcomment.classList.remove('d-none')
+      Updatecomment.classList.add('d-none')
+      
+      snackbar(`The Comment id ${updateId} Is Updated Successfully!!`,'success')
+
+    }else{
+      snackbar(xhr,'error')
+    }
+
+      spinner.classList.add('d-none')
+
+
+  }
+
+
+}
+
+
+function OnRemove(ele){
+  let removeId = ele.closest('.col-md-4').id
+  Swal.fire({
+  title: `Are you sure you want to delete comment ${removeId}?`,
+  text: "You won't be able to revert this!",
+  icon: "warning",
+  showCancelButton: true,
+  confirmButtonColor: "#3085d6",
+  cancelButtonColor: "#d33",
+  confirmButtonText: "Yes, delete it!"
+}).then((result) => {
+  if (result.isConfirmed) {
+  spinner.classList.remove('d-none')
+
+
+  let delete_url = `${Base_Url}/comments/${removeId}`
+
+  let xhr = new XMLHttpRequest()
+
+  xhr.open('DELETE',delete_url)
+
+  xhr.send(null)
+
+  xhr.onload = function() {
+    if(xhr.status >=200 && xhr.status <= 299){
+
+      ele.closest('.col-md-4').remove()
+
+      snackbar(`The Comment id ${removeId} Is Removed Successfully!!`,'success')
+
+
+    }else{
+      snackbar(xhr,'error')
+    }
+
+
+    spinner.classList.add('d-none')
+
+  }
+  }
+});
+
+  
+
+}
+
+
+
+
+
+
+
+
+
+
+inputform.addEventListener('submit',onsubmit)
+Updatecomment.addEventListener('click',onupdate)
